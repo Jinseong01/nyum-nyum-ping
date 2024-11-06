@@ -18,12 +18,16 @@ class _HomescreenState extends State<Homescreen> {
         index: _menuIndex,
         // 여기 배열에 페이지 생성
         children: [
-
         ],
       ),
 
       bottomNavigationBar: NavigationBar(
           selectedIndex: _menuIndex,
+          onDestinationSelected: (idx){
+            setState(() {
+              _menuIndex=idx;
+            });
+          },
           destinations: [
             NavigationDestination(
                 icon: Icon(Icons.home_outlined,),
