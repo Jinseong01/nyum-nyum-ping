@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nyum_nyum_ping/bookmark/book_mark.dart';
+import 'package:nyum_nyum_ping/mypage/mypage.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -17,7 +19,10 @@ class _HomescreenState extends State<Homescreen> {
       body: IndexedStack(
         index: _menuIndex,
         // 여기 배열에 페이지 생성
-        children: [
+        children: const [
+          BookMark(),
+          Mypage(),
+          
         ],
       ),
 
@@ -28,7 +33,7 @@ class _HomescreenState extends State<Homescreen> {
               _menuIndex=idx;
             });
           },
-          destinations: [
+          destinations: const [
             NavigationDestination(
                 icon: Icon(Icons.home_outlined,),
                 label: "홈"
