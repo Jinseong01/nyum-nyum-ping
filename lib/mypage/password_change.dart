@@ -7,7 +7,7 @@ class PasswordChangePage extends StatefulWidget {
   @override
   State<PasswordChangePage> createState() => _PasswordChangePageState();
 }
-
+ 
 class _PasswordChangePageState extends State<PasswordChangePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _newPasswordController = TextEditingController();

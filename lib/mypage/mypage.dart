@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage 가져오기
 import 'package:nyum_nyum_ping/login/FirstScreen.dart'; // FirstScreen 가져오기
 import 'password_verification.dart';
 import 'nickname_change.dart';
@@ -17,48 +18,108 @@ class _MypageState extends State<Mypage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// **사용자 데이터 실시간 스트림**
   Stream<DocumentSnapshot> getUserStream() {
     User? user = _auth.currentUser;
     if (user != null) {
-      return _firestore.collection('User').doc(user.uid).snapshots();
+      return _firestore.collection('User').doc(user.email).snapshots();
     } else {
       throw Exception("로그인된 사용자가 없습니다.");
     }
   }
 
   /// **회원탈퇴 로직**
-  Future<void> deleteUserAccount() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user == null) {
-        throw Exception("로그인된 사용자가 없습니다.");
+Future<void> deleteUserAccount() async {
+  try {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception("로그인된 사용자가 없습니다.");
+    }
+
+    final userEmail = user.email;
+    if (userEmail == null) {
+      throw Exception("사용자의 이메일을 찾을 수 없습니다.");
+    }
+ 
+    // **Firestore 데이터 삭제**
+    // 3. Reviews 삭제
+    print("Reviews 데이터 삭제 시작...");
+    final reviewsQuerySnapshot = await _firestore.collection('Reviews').get();
+    for (var doc in reviewsQuerySnapshot.docs) {
+      if (doc.data().containsKey('reviews')) {
+        List<dynamic> reviews = doc['reviews'] ?? [];
+        reviews.removeWhere((review) => review['email'] == userEmail);
+        await doc.reference.update({'reviews': reviews});
+      } else {
+        print("문서에 'reviews' 필드가 없습니다: ${doc.id}");
       }
+    }
+    print("Reviews 데이터 삭제 완료!");
 
-      final userEmail = user.email;
-      if (userEmail == null) {
-        throw Exception("사용자의 이메일을 찾을 수 없습니다.");
+    // 1. BookMarks 삭제
+    print("BookMarks 삭제 시작...");
+    await _firestore.collection('BookMarks').doc(userEmail).delete();
+    print("BookMarks 삭제 완료!");
+
+    // 2. Boards 삭제
+    print("Boards 데이터 삭제 시작...");
+    final boardsQuerySnapshot = await _firestore
+        .collection('Boards')
+        .where('email', isEqualTo: userEmail)
+        .get();
+
+    for (var doc in boardsQuerySnapshot.docs) {
+      // Storage에서 이미지 삭제
+      if (doc.data().containsKey('imageUrl')) {
+        List<dynamic> imageUrls = doc['imageUrl'] != null ? List.from(doc['imageUrl']) : [];
+        await _deleteImagesFromStorage(imageUrls);
       }
+      // 문서 삭제
+      await doc.reference.delete();
+    }
+    print("Boards 데이터 삭제 완료!");
 
-      // Firestore에서 데이터 삭제
-      await _firestore.collection('BookMarks').doc(userEmail).delete(); // BookMarks 문서 삭제
-      await _firestore.collection('User').doc(user.uid).delete(); // User 문서 삭제
+    
 
-      // Firebase Authentication 계정 삭제
-      await user.delete();
+    // 4. User 문서 삭제
+    print("User 문서 삭제 시작...");
+    await _firestore.collection('User').doc(userEmail).delete();
+    print("User 문서 삭제 완료!");
 
-      // FirstScreen으로 이동
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const FirstScreen()),
-        (route) => false, // 모든 스택 제거
-      );
-    } catch (e) {
-      print("회원탈퇴 중 오류 발생: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("회원탈퇴 중 오류가 발생했습니다: $e")),
-      );
+    // **Firebase Authentication 계정 삭제**
+    print("Firebase Authentication 계정 삭제 시작...");
+    await user.delete();
+    print("Firebase Authentication 계정 삭제 완료!");
+
+    // **회원탈퇴 후 화면 이동**
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const FirstScreen()),
+      (route) => false, // 모든 스택 제거
+    );
+  } catch (e) {
+    print("회원탈퇴 중 오류 발생: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("회원탈퇴 중 오류가 발생했습니다: $e")),
+    );
+  }
+}
+
+/// **Storage 이미지 삭제 함수**
+Future<void> _deleteImagesFromStorage(List<dynamic> imageUrls) async {
+  final storage = FirebaseStorage.instance;
+  for (var url in imageUrls) {
+    if (url.isNotEmpty) {
+      try {
+        await storage.refFromURL(url).delete();
+        print("이미지 삭제 성공: $url");
+      } catch (e) {
+        print('이미지 삭제 실패: $e');
+      }
     }
   }
+}
+
 
   /// **로그아웃 로직**
   Future<void> logout() async {

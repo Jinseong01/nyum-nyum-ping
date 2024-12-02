@@ -28,7 +28,7 @@ class _NicknameChangePageState extends State<NicknameChangePage> {
       User? user = _auth.currentUser;
       if (user != null) {
         DocumentSnapshot userDoc =
-            await _firestore.collection('User').doc(user.uid).get();
+            await _firestore.collection('User').doc(user.email).get();
         if (userDoc.exists) {
           setState(() {
             currentNickname =
@@ -48,7 +48,7 @@ class _NicknameChangePageState extends State<NicknameChangePage> {
         _errorMessage = "닉네임을 입력해주세요.";
       });
       return;
-    }
+    } 
     if (newNickname.length > 10) {
       setState(() {
         _errorMessage = "닉네임 양식이 일치하지 않습니다.";
@@ -58,7 +58,7 @@ class _NicknameChangePageState extends State<NicknameChangePage> {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
-        await _firestore.collection('User').doc(user.uid).update({
+        await _firestore.collection('User').doc(user.email).update({
           'nickname': newNickname,
         });
         setState(() {
