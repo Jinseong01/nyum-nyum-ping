@@ -16,7 +16,7 @@ class _PasswordVerificationPageState extends State<PasswordVerificationPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true; // 비밀번호 숨김 여부
   String? _errorMessage; // 오류 메시지
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
