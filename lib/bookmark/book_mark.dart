@@ -1,6 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:nyum_nyum_ping/firebase/AuthService.dart'; // AuthService 가져오기
 
+// 임시 RestaurantDetail 클래스 추가 -> merge할때 삭제 요청
+class RestaurantDetail extends StatelessWidget {
+  final Map<String, dynamic> restaurant;
+
+  const RestaurantDetail({super.key, required this.restaurant});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(restaurant['name'] ?? 'Restaurant Detail'),
+      ),
+      body: Center(
+        child: Text(
+          'Details for ${restaurant['name']}',
+          style: const TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+}
+
 class BookMark extends StatefulWidget {
   const BookMark({super.key});
 
@@ -145,25 +167,28 @@ Widget build(BuildContext context) {
       backgroundColor: Colors.white,
       foregroundColor: Colors.black,
       elevation: 0.5,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildCategoryIcon(
-            icon: Icons.rice_bowl,
-            label: "한식",
-            category: "한식",
-          ),
-          _buildCategoryIcon(
-            icon: Icons.ramen_dining,
-            label: "중식",
-            category: "중식",
-          ),
-          _buildCategoryIcon(
-            icon: Icons.dinner_dining,
-            label: "양식",
-            category: "양식",
-          ),
-        ],
+      title: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8 ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildCategoryIcon(
+              icon: Icons.rice_bowl,
+              label: "한식",
+              category: "한식",
+            ),
+            _buildCategoryIcon(
+              icon: Icons.ramen_dining,
+              label: "중식",
+              category: "중식",
+            ),
+            _buildCategoryIcon(
+              icon: Icons.dinner_dining,
+              label: "양식",
+              category: "양식",
+            ),
+          ],
+        ),
       ),
     ),
     body: _isLoading
@@ -321,7 +346,17 @@ Widget build(BuildContext context) {
                               ),
                             );
                           },
-                          isBookmarked: true,
+                           onImageTap: () { // 12.03 추가
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RestaurantDetail(
+                          restaurant: bookmark,
+                        ),
+                      ),
+                    );
+                  },
+                  isBookmarked: true,
                         );
                       },
                     ),
@@ -339,6 +374,7 @@ Widget build(BuildContext context) {
     required String category,
   }) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           icon: Icon(
@@ -368,6 +404,7 @@ class RestaurantCard extends StatelessWidget {
   final String name;
   final VoidCallback onMemoTap;
   final VoidCallback onBookmarkToggle;
+  final VoidCallback onImageTap; // onImageTap 콜백 추가
   final bool isBookmarked;
 
   const RestaurantCard({
@@ -376,6 +413,7 @@ class RestaurantCard extends StatelessWidget {
     required this.name,
     required this.onMemoTap,
     required this.onBookmarkToggle,
+     required this.onImageTap, // 12.03 추가
     required this.isBookmarked,
   });
 
@@ -387,16 +425,19 @@ class RestaurantCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-            child: Image.network(
-              imageUrl,
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
+          GestureDetector( // 12.03 추가
+            onTap: onImageTap, // 12.03 추가
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+              child: Image.network(
+                imageUrl,
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Padding(
