@@ -1,9 +1,14 @@
+// map_screen.dart
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'map_widget.dart';
+import 'search_widget.dart';
+import 'category_widget.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -14,11 +19,10 @@ class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   Position? _currentPosition;
   Set<Marker> _markers = {};
-  String? _selectedCategory;
+  String _selectedCategory = '';
   bool _isSearchVisible = false;
-  TextEditingController _searchController = TextEditingController();
-  String _currentSearchText = "";
   List<String> _searchHistory = [];
+  String _currentSearchText = "";
   Map<String, dynamic>? _selectedRestaurant;
 
   @override
@@ -166,7 +170,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-
   Future<void> _fetchRestaurants() async {
     try {
       final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Restaurants').get();
@@ -176,7 +179,8 @@ class _MapScreenState extends State<MapScreen> {
       double closestDistance = double.infinity;
 
       setState(() {
-        _markers.removeWhere((marker) => marker.markerId.value != 'current_location');
+        // 기존 마커 중 'current_location'을 제외한 모든 마커 제거
+        tempMarkers = _markers.where((marker) => marker.markerId.value == 'current_location').toList();
 
         for (var doc in snapshot.docs) {
           final data = doc.data() as Map<String, dynamic>;
@@ -187,7 +191,7 @@ class _MapScreenState extends State<MapScreen> {
           final String imageUrl = data['imageUrl'] ?? '';
           final GeoPoint geoPoint = data['location'];
 
-          if (_selectedCategory != null && _selectedCategory != '북마크') {
+          if (_selectedCategory.isNotEmpty && _selectedCategory != '북마크') {
             if (category != _selectedCategory) continue;
           }
 
@@ -238,7 +242,7 @@ class _MapScreenState extends State<MapScreen> {
                   name,
                   address,
                   openTime,
-                  data['imageUrl'] ?? '',
+                  imageUrl,
                   category,
                 );
               },
@@ -268,137 +272,6 @@ class _MapScreenState extends State<MapScreen> {
         'category': category,
       };
     });
-  }
-
-  Widget _buildCategoryButton(String label, IconData icon, Color color) {
-    final isSelected = _selectedCategory == label;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (_selectedCategory == label) {
-            _selectedCategory = null; // 이미 선택된 경우 해제
-          } else {
-            _selectedCategory = label; // 새 카테고리 선택
-          }
-        });
-
-        // 북마크 버튼 클릭 시 북마크 데이터 불러오기
-        if (label == '북마크') {
-          _fetchBookmarks();
-        } else {
-          _fetchRestaurants();
-        }
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 10),
-        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 11.3),
-        decoration: BoxDecoration(
-          color: isSelected ? color : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: isSelected ? Colors.white : color),
-            SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchOverlay() {
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        child: Column(
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    setState(() {
-                      _isSearchVisible = false;
-                    });
-                  },
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: '검색어를 입력하세요.',
-                      border: InputBorder.none,
-                    ),
-                    onSubmitted: (value) {
-                      setState(() {
-                        if (!_searchHistory.contains(value)) {
-                          _searchHistory.add(value);
-                        }
-                        _currentSearchText = value;
-                        _isSearchVisible = false;
-                        _fetchRestaurants();
-                      });
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _currentSearchText = "";
-                      _fetchRestaurants();
-                    });
-                  },
-                ),
-              ],
-            ),
-            if (_searchHistory.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _searchHistory.clear();
-                      });
-                    },
-                    child: Text(
-                      '기록 삭제',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _searchHistory.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_searchHistory[index]),
-                    onTap: () {
-                      _searchController.text = _searchHistory[index];
-                      setState(() {
-                        _currentSearchText = _searchHistory[index];
-                        _isSearchVisible = false;
-                        _fetchRestaurants();
-                      });
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildRestaurantInfo() {
@@ -459,32 +332,58 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  void _handleSearch(String query) {
+    setState(() {
+      if (query.isNotEmpty && !_searchHistory.contains(query)) {
+        _searchHistory.add(query);
+      }
+      _currentSearchText = query;
+      _isSearchVisible = false;
+      _fetchRestaurants();
+    });
+  }
 
+  void _handleCategorySelected(String category) {
+    setState(() {
+      _selectedCategory = category;
+      if (category == '북마크') {
+        _fetchBookmarks();
+      } else {
+        _fetchRestaurants();
+      }
+    });
+  }
+
+  void _clearSearchHistory() {
+    setState(() {
+      _searchHistory.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          _currentPosition == null
-              ? Center(child: CircularProgressIndicator())
-              : GoogleMap(
-            mapType: MapType.normal,
-            initialCameraPosition: CameraPosition(
-              target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-              zoom: 14.0,
-            ),
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            mapToolbarEnabled: false,
+          MapWidget(
+            currentPosition: _currentPosition,
             markers: _markers,
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-            },
+            controller: _controller,
+            onMarkerTapped: _onMarkerTapped,
           ),
           if (_isSearchVisible)
             Positioned.fill(
-              child: _buildSearchOverlay(),
+              child: SearchWidget(
+                isVisible: _isSearchVisible,
+                onSearch: _handleSearch,
+                onClose: () {
+                  setState(() {
+                    _isSearchVisible = false;
+                  });
+                },
+                searchHistory: _searchHistory,
+                onClearHistory: _clearSearchHistory,
+              ),
             ),
           if (!_isSearchVisible)
             Positioned(
@@ -521,17 +420,9 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildCategoryButton('북마크', Icons.bookmark, Colors.blue),
-                        _buildCategoryButton('한식', Icons.rice_bowl, Colors.green),
-                        _buildCategoryButton('중식', Icons.ramen_dining, Colors.red),
-                        _buildCategoryButton('양식', Icons.dinner_dining, Colors.orange),
-                      ],
-                    ),
+                  CategoryWidget(
+                    selectedCategory: _selectedCategory,
+                    onCategorySelected: _handleCategorySelected,
                   ),
                 ],
               ),
