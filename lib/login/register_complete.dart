@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nyum_nyum_ping/login/LoginScreen.dart';
-import 'package:nyum_nyum_ping/login/RegisterScreen.dart';
-import 'package:nyum_nyum_ping/login/widgets/LoginButton.dart';
+import 'package:nyum_nyum_ping/login/login_screen.dart';
+import 'package:nyum_nyum_ping/login/register_screen.dart';
+import 'package:nyum_nyum_ping/login/widgets/login_button.dart';
 
 class RegisterComplete extends StatefulWidget {
   const RegisterComplete({super.key});

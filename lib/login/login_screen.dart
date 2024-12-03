@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:nyum_nyum_ping/login/widgets/CommonDialog.dart';
-import 'package:nyum_nyum_ping/login/widgets/LoginButton.dart';
-import 'package:nyum_nyum_ping/main/MainScreen.dart';
+import 'package:nyum_nyum_ping/login/widgets/common_dialog.dart';
+import 'package:nyum_nyum_ping/login/widgets/login_button.dart';
+import 'package:nyum_nyum_ping/main/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

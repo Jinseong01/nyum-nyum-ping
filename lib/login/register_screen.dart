@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:nyum_nyum_ping/firebase/AuthService.dart';
-import 'package:nyum_nyum_ping/login/FirstScreen.dart';
-import 'package:nyum_nyum_ping/login/widgets/CommonDialog.dart';
-import 'package:nyum_nyum_ping/login/widgets/LoginButton.dart';
+import 'package:nyum_nyum_ping/firebase/auth_service.dart';
+import 'package:nyum_nyum_ping/login/first_screen.dart';
+import 'package:nyum_nyum_ping/login/widgets/common_dialog.dart';
+import 'package:nyum_nyum_ping/login/widgets/login_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'LoginScreen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
