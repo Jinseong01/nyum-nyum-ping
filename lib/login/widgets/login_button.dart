@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class LoginButton extends StatelessWidget {
   final VoidCallback onPressed; // 버튼 클릭 시 실행될 함수
+  final String title;
 
   const LoginButton({
     super.key,
-    required this.onPressed
+    required this.onPressed,
+    required this.title
   });
 
   @override
@@ -21,7 +23,7 @@ class LoginButton extends StatelessWidget {
         ),
       ),
       child: Text(
-        "로그인하기",
+        title,
         style: TextStyle(
           fontSize: 16,
           color: Colors.white,

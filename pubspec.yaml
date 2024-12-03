@@ -16,7 +16,13 @@ dependencies:
   firebase_auth: ^5.3.3
   cloud_firestore: ^5.5.0
   firebase_storage: ^12.3.6
-
+  firebase_app_check:
+  geolocator:
+  geocoding:
+  dots_indicator:
+  image_picker:
+  permission_handler:
+  device_info_plus:
 
   cupertino_icons: ^1.0.8
 
@@ -31,4 +37,5 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
+    - assets/images/login/
+    - assets/images
