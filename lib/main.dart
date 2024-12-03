@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "nyum nyum ping",
 
-      home: MainScreen(),
+      home: Homescreen(),
     );
   }
 }
