@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nyum_nyum_ping/HomeScreen.dart';
 import 'package:nyum_nyum_ping/login/widgets/common_dialog.dart';
 import 'package:nyum_nyum_ping/login/widgets/login_button.dart';
 import 'package:nyum_nyum_ping/main/main_screen.dart';
@@ -51,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         print("로그인 성공: ${userCredential.user?.email}");
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainScreen()), // MainScreen으로 이동
+          MaterialPageRoute(builder: (context) => const Homescreen()), // MainScreen으로 이동
         );
       } catch (e) {
         // FirebaseAuthException 처리

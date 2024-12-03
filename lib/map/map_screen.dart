@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -76,6 +77,96 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Future<void> _fetchBookmarks() async {
+    try {
+      // FirebaseAuth에서 현재 로그인한 사용자의 이메일 가져오기
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('로그인한 사용자가 없습니다.')),
+        );
+        return;
+      }
+
+      final String userEmail = user.email ?? '';
+      print('현재 사용자 이메일: $userEmail');
+      if (userEmail.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('이메일을 가져올 수 없습니다.')),
+        );
+        return;
+      }
+
+      // Firestore에서 북마크 데이터를 가져오기
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('BookMarks')
+          .doc(userEmail)
+          .get();
+
+      if (!userDoc.exists) {
+        print('사용자 북마크 문서를 찾을 수 없음: $userEmail');
+      } else {
+        print('북마크 데이터: ${userDoc.data()}');
+      }
+
+      if (!userDoc.exists || userDoc.data() == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('북마크 데이터를 찾을 수 없습니다.')),
+        );
+        return;
+      }
+
+      // 북마크 데이터를 읽어옴
+      final List<dynamic> bookmarks = (userDoc.data() as Map<String, dynamic>)['bookMarks'] ?? [];
+
+      List<Marker> bookmarkMarkers = [];
+      for (var bookmark in bookmarks) {
+        final String name = bookmark['name'] ?? '';
+
+        // `Restaurants` 컬렉션에서 이름으로 검색
+        final QuerySnapshot restaurantSnapshot = await FirebaseFirestore.instance
+            .collection('Restaurants')
+            .where('name', isEqualTo: name)
+            .get();
+
+        if (restaurantSnapshot.docs.isEmpty) {
+          print('식당을 찾을 수 없음: $name');
+          continue;
+        }
+
+        // 첫 번째 검색 결과 사용
+        final restaurantData = restaurantSnapshot.docs.first.data() as Map<String, dynamic>;
+        final GeoPoint location = restaurantData['location'];
+        final String category = restaurantData['category'] ?? '카테고리 없음';
+        final String address = restaurantData['address'] ?? '주소 없음';
+        final String openTime = restaurantData['openTime'] ?? '영업시간 없음';
+
+        // 마커 추가
+        bookmarkMarkers.add(
+          Marker(
+            markerId: MarkerId(name),
+            position: LatLng(location.latitude, location.longitude),
+            infoWindow: InfoWindow(
+              title: name,
+              snippet: '$category\n$address\n영업시간: $openTime',
+            ),
+          ),
+        );
+      }
+
+      // 마커를 상태로 업데이트
+      setState(() {
+        _markers = bookmarkMarkers.toSet();
+      });
+    } catch (e) {
+      print('북마크 데이터를 가져오는 중 에러 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('북마크 데이터를 불러오는 데 실패했습니다.')),
+      );
+    }
+  }
+
+
   Future<void> _fetchRestaurants() async {
     try {
       final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Restaurants').get();
@@ -93,6 +184,7 @@ class _MapScreenState extends State<MapScreen> {
           final String category = data['category'] ?? '';
           final String address = data['address'] ?? '주소 정보 없음';
           final String openTime = data['openTime'] ?? '영업시간 정보 없음';
+          final String imageUrl = data['imageUrl'] ?? '';
           final GeoPoint geoPoint = data['location'];
 
           if (_selectedCategory != null && _selectedCategory != '북마크') {
@@ -147,6 +239,7 @@ class _MapScreenState extends State<MapScreen> {
                   address,
                   openTime,
                   data['imageUrl'] ?? '',
+                  category,
                 );
               },
             ),
@@ -165,13 +258,14 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _onMarkerTapped(String name, String address, String openTime, String imageUrl) {
+  void _onMarkerTapped(String name, String address, String openTime, String imageUrl, String category) {
     setState(() {
       _selectedRestaurant = {
         'name': name,
         'address': address,
         'openTime': openTime,
         'imageUrl': imageUrl,
+        'category': category,
       };
     });
   }
@@ -187,13 +281,19 @@ class _MapScreenState extends State<MapScreen> {
             _selectedCategory = label; // 새 카테고리 선택
           }
         });
-        _fetchRestaurants(); // 카테고리 선택 후 데이터 다시 로드
+
+        // 북마크 버튼 클릭 시 북마크 데이터 불러오기
+        if (label == '북마크') {
+          _fetchBookmarks();
+        } else {
+          _fetchRestaurants();
+        }
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 10),
         padding: EdgeInsets.symmetric(vertical: 6, horizontal: 11.3),
         decoration: BoxDecoration(
-          color: isSelected ? color : Colors.grey[200],
+          color: isSelected ? color : Colors.white,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -307,7 +407,7 @@ class _MapScreenState extends State<MapScreen> {
     return Positioned(
       bottom: 20,
       left: 10,
-      right: 75, // 가로 크기를 조정하여 오른쪽 여백 추가
+      right: 60, // 가로 크기를 조정하여 오른쪽 여백 추가
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
