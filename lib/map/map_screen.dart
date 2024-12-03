@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'map_widget.dart';
-import 'search_widget.dart';
-import 'category_widget.dart';
+import 'package:nyum_nyum_ping/map/widget/category_widget.dart';
+import 'package:nyum_nyum_ping/map/widget/map_widget.dart';
+import 'package:nyum_nyum_ping/map/widget/search_widget.dart';
 
 class MapScreen extends StatefulWidget {
   @override
