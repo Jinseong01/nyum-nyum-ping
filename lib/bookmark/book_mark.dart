@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nyum_nyum_ping/firebase/AuthService.dart'; // AuthService 가져오기
+import 'package:nyum_nyum_ping/firebase/auth_service.dart'; // AuthService 가져오기
 
 // 임시 RestaurantDetail 클래스 추가 -> merge할때 삭제 요청
 class RestaurantDetail extends StatelessWidget {

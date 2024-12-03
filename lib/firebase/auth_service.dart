@@ -71,7 +71,7 @@ class AuthService {
 
   /// **회원가입 (이메일 & 비밀번호)**
   Future<User?> signUpWithEmailAndPassword(
-      String email, String password, String nickname) async {
+      String email, String password, String name, String nickname) async {
     try {
       UserCredential userCredential =
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
@@ -79,8 +79,8 @@ class AuthService {
       // Firestore에 사용자 추가 지금은 uid로했은데 email로 해도됨 ㅇㅇ
       await _firestore.collection('User').doc(userCredential.user!.uid).set({
         'email': email,
+        'name' : name,
         'nickname': nickname,
-        'createdAt': FieldValue.serverTimestamp(),
       });
 
       return userCredential.user;

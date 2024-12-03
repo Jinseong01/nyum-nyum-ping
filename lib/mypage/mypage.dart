@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage 가져오기
-import 'package:nyum_nyum_ping/login/FirstScreen.dart'; // FirstScreen 가져오기
+import 'package:nyum_nyum_ping/login/first_screen.dart'; // FirstScreen 가져오기
 import 'password_verification.dart';
 import 'nickname_change.dart';
 import 'password_change.dart';

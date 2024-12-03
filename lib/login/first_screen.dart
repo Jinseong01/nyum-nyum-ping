@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nyum_nyum_ping/login/LoginScreen.dart';
-import 'package:nyum_nyum_ping/login/widgets/LoginButton.dart';
+import 'package:nyum_nyum_ping/login/login_screen.dart';
+import 'package:nyum_nyum_ping/login/register_screen.dart';
+import 'package:nyum_nyum_ping/login/widgets/login_button.dart';
 
 class FirstScreen extends StatefulWidget {
   const FirstScreen({super.key});
@@ -20,7 +21,7 @@ class _FirstScreenState extends State<FirstScreen> {
           children: [
             SizedBox(height: 130,),
             Image.asset(
-              'assets/images/logo.png',
+              'assets/images/login/logo.png',
               width: 150,
               height: 150,
             ),
@@ -38,6 +39,7 @@ class _FirstScreenState extends State<FirstScreen> {
               height: 200,
             ),
             LoginButton(
+              title: "로그인하기",
                 onPressed: (){
                   Navigator.push(
                       context,
@@ -50,7 +52,12 @@ class _FirstScreenState extends State<FirstScreen> {
             TextButton(
               onPressed: () {
                 // 회원가입 로직 추가
-                print('회원가입 클릭됨');
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context)=>RegisterScreen()
+                    )
+                );
               },
               child: const Text(
                 '회원가입하기',

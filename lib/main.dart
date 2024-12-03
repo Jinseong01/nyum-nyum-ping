@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase/AuthService.dart';
-import 'login/FirstScreen.dart';
+import 'package:nyum_nyum_ping/login/register_complete.dart';
+import 'package:nyum_nyum_ping/login/register_screen.dart';
+import 'package:nyum_nyum_ping/main/main_screen.dart';
+import 'firebase/auth_service.dart';
+import 'login/first_screen.dart';
 import 'package:nyum_nyum_ping/HomeScreen.dart';
 import 'firebase_options.dart';
 
@@ -25,11 +28,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return const MaterialApp(
+    return MaterialApp(
       title: "nyum nyum ping",
 
-      home: 
-      Homescreen(),
+      home: MainScreen(),
     );
   }
 }

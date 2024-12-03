@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nyum_nyum_ping/firebase/AuthService.dart'; // AuthService import
+import 'package:nyum_nyum_ping/firebase/auth_service.dart'; // AuthService import
 
 class PasswordVerificationPage extends StatefulWidget {
   final VoidCallback onVerified;
