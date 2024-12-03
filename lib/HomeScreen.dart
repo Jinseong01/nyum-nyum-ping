@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:nyum_nyum_ping/bookmark/book_mark.dart';
 import 'package:nyum_nyum_ping/main/main_screen.dart';
+import 'package:nyum_nyum_ping/map/map_screen.dart';
+import 'package:nyum_nyum_ping/mypage/mypage.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -20,6 +23,9 @@ class _HomescreenState extends State<Homescreen> {
         // 여기 배열에 페이지 생성
         children: [
           MainScreen(),
+          MapScreen(),
+          const BookMark(),
+          const Mypage(),
         ],
       ),
 

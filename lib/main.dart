@@ -16,8 +16,8 @@ void main() async{
   );
 
   // 테스트 계정으로 강제 로그인
-  final AuthService authService = AuthService();
-  await authService.signInWithTestAccount();
+  // final AuthService authService = AuthService();
+  // await authService.signInWithTestAccount();
 
   runApp(const MyApp());
 }
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "nyum nyum ping",
 
-      home: MainScreen(),
+      home: Homescreen(),
     );
   }
 }
