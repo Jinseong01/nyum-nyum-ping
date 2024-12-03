@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nyum_nyum_ping/main/main_screen.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -18,6 +19,7 @@ class _HomescreenState extends State<Homescreen> {
         index: _menuIndex,
         // 여기 배열에 페이지 생성
         children: [
+          MainScreen(),
         ],
       ),
 
