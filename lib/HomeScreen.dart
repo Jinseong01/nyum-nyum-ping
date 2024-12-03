@@ -23,7 +23,7 @@ class _HomescreenState extends State<Homescreen> {
         // 여기 배열에 페이지 생성
         children: [
           MainScreen(),
-          MapSample(),
+          MapScreen(),
           const BookMark(),
           const Mypage(),
         ],
