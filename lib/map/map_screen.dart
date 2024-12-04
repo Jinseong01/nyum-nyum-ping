@@ -135,6 +135,7 @@ class _MapScreenState extends State<MapScreen> {
         final String category = restaurantData['category'] ?? '카테고리 없음';
         final String address = restaurantData['address'] ?? '주소 없음';
         final String openTime = restaurantData['openTime'] ?? '영업시간 없음';
+        final String imageUrl = restaurantData['imageUrl'] ?? '이미지 없음'; // imageUrl 추가
 
         // 마커 추가
         bookmarkMarkers.add(
@@ -145,6 +146,15 @@ class _MapScreenState extends State<MapScreen> {
               title: name,
               snippet: '$category\n$address\n영업시간: $openTime',
             ),
+            onTap: () {
+              _onMarkerTapped(
+                name,
+                address,
+                openTime,
+                imageUrl,
+                category,
+              );
+            },
           ),
         );
       }
@@ -233,18 +243,6 @@ class _MapScreenState extends State<MapScreen> {
                 category,
               );
             },
-          ),
-        );
-      }
-
-      // 현재 위치 마커 추가
-      if (_currentPosition != null) {
-        tempMarkers.add(
-          Marker(
-            markerId: MarkerId('current_location'),
-            position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-            infoWindow: InfoWindow(title: '현재 위치'),
           ),
         );
       }

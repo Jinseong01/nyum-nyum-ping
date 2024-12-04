@@ -117,6 +117,7 @@ class _BoardScreenState extends State<BoardScreen> {
               child: RefreshIndicator(
                 onRefresh: _fetchPosts, // 새로고침 시 호출
                 child: ListView.separated(
+                  padding: EdgeInsets.zero,
                   controller: _scrollController, // 스크롤 컨트롤러 추가
                   itemCount:
                       _posts.length + (_isLoading ? 1 : 0), // 로딩 상태 표시 포함
