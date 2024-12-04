@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:html' as html;
 
 import '../board/class/Post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
