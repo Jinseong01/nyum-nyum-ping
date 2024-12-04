@@ -9,7 +9,9 @@ import 'package:nyum_nyum_ping/map/widget/category_widget.dart';
 import 'package:nyum_nyum_ping/map/widget/map_widget.dart';
 import 'package:nyum_nyum_ping/map/widget/search_widget.dart';
 
-import '../bookmark/book_mark.dart';
+import '../bookmark/book_mark.dart' as bookmark; // Prefix 추가
+import '../main/widgets/restaurant.dart';
+import '../main/restaurant_detail.dart' as restaurant_detail; // Prefix 추가
 
 class MapScreen extends StatefulWidget {
   @override
@@ -24,7 +26,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _isSearchVisible = false;
   List<String> _searchHistory = [];
   String _currentSearchText = "";
-  Map<String, dynamic>? _selectedRestaurant;
+  Restaurant? _selectedRestaurant; // 타입 변경
 
   @override
   void initState() {
@@ -167,100 +169,133 @@ class _MapScreenState extends State<MapScreen> {
       LatLng? closestPosition;
       double closestDistance = double.infinity;
 
-      setState(() {
-        // 기존 마커 중 'current_location'을 제외한 모든 마커 제거
-        tempMarkers = _markers.where((marker) => marker.markerId.value == 'current_location').toList();
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final String name = data['name'] ?? '';
+        final String category = data['category'] ?? '';
+        final String address = data['address'] ?? '주소 정보 없음';
+        final String openTime = data['openTime'] ?? '영업시간 정보 없음';
+        final String imageUrl = data['imageUrl'] ?? '';
+        final GeoPoint geoPoint = data['location'];
 
-        for (var doc in snapshot.docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          final String name = data['name'] ?? '';
-          final String category = data['category'] ?? '';
-          final String address = data['address'] ?? '주소 정보 없음';
-          final String openTime = data['openTime'] ?? '영업시간 정보 없음';
-          final String imageUrl = data['imageUrl'] ?? '';
-          final GeoPoint geoPoint = data['location'];
-
-          if (_selectedCategory.isNotEmpty && _selectedCategory != '북마크') {
-            if (category != _selectedCategory) continue;
-          }
-
-          if (_currentSearchText.isNotEmpty) {
-            if (!name.contains(_currentSearchText) && !category.contains(_currentSearchText)) {
-              continue;
-            }
-          }
-
-          final restaurantPosition = LatLng(geoPoint.latitude, geoPoint.longitude);
-
-          if (_currentPosition != null) {
-            final distance = Geolocator.distanceBetween(
-              _currentPosition!.latitude,
-              _currentPosition!.longitude,
-              geoPoint.latitude,
-              geoPoint.longitude,
-            );
-
-            if (distance < closestDistance) {
-              closestDistance = distance;
-              closestPosition = restaurantPosition;
-            }
-          }
-
-          BitmapDescriptor markerIcon;
-          if (category == '한식') {
-            markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
-          } else if (category == '중식') {
-            markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
-          } else if (category == '양식') {
-            markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
-          } else {
-            markerIcon = BitmapDescriptor.defaultMarker;
-          }
-
-          tempMarkers.add(
-            Marker(
-              markerId: MarkerId(name),
-              position: restaurantPosition,
-              icon: markerIcon,
-              infoWindow: InfoWindow(
-                title: name,
-                snippet: category,
-              ),
-              onTap: () {
-                _onMarkerTapped(
-                  name,
-                  address,
-                  openTime,
-                  imageUrl,
-                  category,
-                );
-              },
-            ),
-          );
+        if (_selectedCategory.isNotEmpty && _selectedCategory != '북마크') {
+          if (category != _selectedCategory) continue;
         }
 
+        if (_currentSearchText.isNotEmpty) {
+          if (!name.contains(_currentSearchText) && !category.contains(_currentSearchText)) {
+            continue;
+          }
+        }
+
+        final restaurantPosition = LatLng(geoPoint.latitude, geoPoint.longitude);
+
+        if (_currentPosition != null) {
+          final distance = Geolocator.distanceBetween(
+            _currentPosition!.latitude,
+            _currentPosition!.longitude,
+            geoPoint.latitude,
+            geoPoint.longitude,
+          );
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestPosition = restaurantPosition;
+          }
+        }
+
+        BitmapDescriptor markerIcon;
+        if (category == '한식') {
+          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+        } else if (category == '중식') {
+          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
+        } else if (category == '양식') {
+          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
+        } else {
+          markerIcon = BitmapDescriptor.defaultMarker;
+        }
+
+        tempMarkers.add(
+          Marker(
+            markerId: MarkerId(name),
+            position: restaurantPosition,
+            icon: markerIcon,
+            infoWindow: InfoWindow(
+              title: name,
+              snippet: category,
+            ),
+            onTap: () {
+              _onMarkerTapped(
+                name,
+                address,
+                openTime,
+                imageUrl,
+                category,
+              );
+            },
+          ),
+        );
+      }
+
+      // 현재 위치 마커 추가
+      if (_currentPosition != null) {
+        tempMarkers.add(
+          Marker(
+            markerId: MarkerId('current_location'),
+            position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+            infoWindow: InfoWindow(title: '현재 위치'),
+          ),
+        );
+      }
+
+      setState(() {
         _markers = tempMarkers.toSet();
       });
 
       if (closestPosition != null) {
         final GoogleMapController controller = await _controller.future;
-        controller.animateCamera(CameraUpdate.newLatLngZoom(closestPosition!, 16));
+        controller.animateCamera(CameraUpdate.newLatLngZoom(closestPosition, 16));
       }
     } catch (e) {
       print('Firestore 에러: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('레스토랑 데이터를 불러오는 데 실패했습니다.')),
+      );
     }
   }
 
-  void _onMarkerTapped(String name, String address, String openTime, String imageUrl, String category) {
-    setState(() {
-      _selectedRestaurant = {
-        'name': name,
-        'address': address,
-        'openTime': openTime,
-        'imageUrl': imageUrl,
-        'category': category,
-      };
-    });
+  void _onMarkerTapped(String name, String address, String openTime, String imageUrl, String category) async {
+    try {
+      // Restaurants 컬렉션에서 이름으로 검색
+      final QuerySnapshot restaurantSnapshot = await FirebaseFirestore.instance
+          .collection('Restaurants')
+          .where('name', isEqualTo: name)
+          .get();
+
+      if (restaurantSnapshot.docs.isEmpty) {
+        print('식당을 찾을 수 없음: $name');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('선택한 식당을 찾을 수 없습니다.')),
+        );
+        return;
+      }
+
+      // 첫 번째 검색 결과 사용
+      final restaurantData = restaurantSnapshot.docs.first.data() as Map<String, dynamic>;
+
+      // Restaurant 객체 생성
+      Restaurant restaurant = Restaurant.fromJson(restaurantData);
+
+      setState(() {
+        _selectedRestaurant = restaurant;
+      });
+    } catch (e) {
+      print('식당 데이터를 가져오는 중 오류 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('식당 데이터를 불러오는 데 실패했습니다.')),
+      );
+    }
   }
 
   Widget _buildRestaurantInfo() {
@@ -284,14 +319,16 @@ class _MapScreenState extends State<MapScreen> {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RestaurantDetail(
-                      restaurant: _selectedRestaurant!,
+                if (_selectedRestaurant != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => restaurant_detail.RestaurantDetail(
+                        restaurant: _selectedRestaurant!,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               },
               child: Container(
                 width: double.infinity,
@@ -300,20 +337,20 @@ class _MapScreenState extends State<MapScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
-                    image: NetworkImage(_selectedRestaurant!['imageUrl']),
+                    image: NetworkImage(_selectedRestaurant!.imageUrl),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
             Text(
-              _selectedRestaurant!['name'],
+              _selectedRestaurant!.name,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 5),
-            Text('주소: ${_selectedRestaurant!['address']}'),
+            Text('주소: ${_selectedRestaurant!.address}'),
             SizedBox(height: 5),
-            Text('영업시간: ${_selectedRestaurant!['openTime']}'),
+            Text('영업시간: ${_selectedRestaurant!.openTime}'),
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
@@ -368,7 +405,7 @@ class _MapScreenState extends State<MapScreen> {
             currentPosition: _currentPosition,
             markers: _markers,
             controller: _controller,
-            onMarkerTapped: _onMarkerTapped,
+            onMarkerTapped: _onMarkerTapped, // MapWidget이 onMarkerTapped를 호출하도록 설정
           ),
           if (_isSearchVisible)
             Positioned.fill(
