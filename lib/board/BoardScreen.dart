@@ -108,7 +108,10 @@ class _BoardScreenState extends State<BoardScreen> {
         body: Column(
           children: [
             // 좋아요 상위 게시글 표시 위젯
-            ScrollButtons(topPosts: _topPosts),
+            Padding(
+              padding: const EdgeInsets.only(top: 40.0), // 원하는 간격 추가
+              child: ScrollButtons(topPosts: _topPosts),
+            ),
             // 게시글 목록
             Expanded(
               child: RefreshIndicator(
