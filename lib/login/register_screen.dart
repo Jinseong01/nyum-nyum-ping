@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool emailCheck=false;
   bool nicknameCheck=false;
 
-  bool _isPasswordVisible = false;
+  bool _isPasswordVisible = true;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
