@@ -33,7 +33,7 @@ class PostCard extends StatelessWidget {
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+            bottom: BorderSide(color: Colors.grey.shade400, width: 1),
           ),
         ),
         child: Row(

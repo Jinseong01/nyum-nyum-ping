@@ -9,6 +9,7 @@ class AlreadyLikeDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16), // 둥근 모서리
       ),
+      backgroundColor: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(

@@ -180,6 +180,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: Color(0xFFFFFDF3),
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.black),

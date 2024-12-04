@@ -27,7 +27,7 @@ class ScrollButtons extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1), // 하단 경계선
+          bottom: BorderSide(color: Colors.grey.shade600, width: 1), // 하단 경계선
         ),
       ),
       child: ListView.builder(
@@ -48,7 +48,7 @@ class ScrollButtons extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               margin: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리
               ),
               child: Row(
