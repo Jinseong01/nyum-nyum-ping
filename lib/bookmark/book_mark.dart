@@ -175,134 +175,143 @@ class _BookMarkState extends State<BookMark> {
           ? const Center(child: CircularProgressIndicator())
           : filteredBookmarks.isEmpty
               ? const Center(child: Text("해당 카테고리에 북마크가 없습니다."))
-              : ListView.builder(
-                  itemCount: filteredBookmarks.length,
-                  itemBuilder: (context, index) {
-                    final bookmark = filteredBookmarks[index];
-                    return RestaurantCard(
-                      imageUrl: bookmark['imageUrl'].isNotEmpty
-                          ? bookmark['imageUrl']
-                          : 'https://via.placeholder.com/150',
-                      name: bookmark['name'],
-                      onMemoTap: () {
-                        final TextEditingController memoController =
-                            TextEditingController(text: bookmark['memo']);
-
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(
-                              bookmark['name'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            content: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: TextField(
-                                controller: memoController,
-                                maxLines: 7,
-                                style: const TextStyle(fontSize: 14, color: Colors.black),
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: '메모를 수정하세요',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
+              : Column(
+                children: [
+                  // const SizedBox(height: 50), // 글자 수호대 4트
+                  Expanded( // 글자 수호대 5트
+                    child: ListView.builder(
+                        itemCount: filteredBookmarks.length,
+                        itemBuilder: (context, index) {
+                          final bookmark = filteredBookmarks[index];
+                          return RestaurantCard(
+                            imageUrl: bookmark['imageUrl'].isNotEmpty
+                                ? bookmark['imageUrl']
+                                : 'https://via.placeholder.com/150',
+                            name: bookmark['name'],
+                            onMemoTap: () {
+                              final TextEditingController memoController =
+                                  TextEditingController(text: bookmark['memo']);
+                    
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(
+                                    bookmark['name'],
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                ),
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  updateMemo(index, memoController.text);
-                                },
-                                child: const Text('저장'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('취소'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      onBookmarkToggle: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: Colors.grey[200],
-                            content: const Text(
-                              '북마크를 취소하시겠습니까?',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            actionsAlignment: MainAxisAlignment.spaceEvenly,
-                            actions: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  content: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: TextField(
+                                      controller: memoController,
+                                      maxLines: 7,
+                                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: '메모를 수정하세요',
+                                        hintStyle: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      ),
+                                    ),
                                   ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        updateMemo(index, memoController.text);
+                                      },
+                                      child: const Text('저장'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('취소'),
+                                    ),
+                                  ],
                                 ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  deleteBookmark(index);
-                                },
-                                child: const Text('네'),
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                              );
+                            },
+                            onBookmarkToggle: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: Colors.grey[200],
+                                  content: const Text(
+                                    '북마크를 취소하시겠습니까?',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
+                                  actionsAlignment: MainAxisAlignment.spaceEvenly,
+                                  actions: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        deleteBookmark(index);
+                                      },
+                                      child: const Text('네'),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('아니오'),
+                                    ),
+                                  ],
                                 ),
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('아니오'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      onImageTap: () async {
-                        final restaurant = await fetchRestaurant(bookmark['name']);
-                        if (restaurant != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RestaurantDetail(restaurant: restaurant),
-                            ),
+                              );
+                            },
+                            onImageTap: () async {
+                              final restaurant = await fetchRestaurant(bookmark['name']);
+                              if (restaurant != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RestaurantDetail(restaurant: restaurant),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('가게 정보를 불러오지 못했습니다.')),
+                                );
+                              }
+                            },
+                            isBookmarked: true,
                           );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('가게 정보를 불러오지 못했습니다.')),
-                          );
-                        }
-                      },
-                      isBookmarked: true,
-                    );
-                  },
-                ),
+                        },
+                      ),
+                  ),
+                ],
+              ),
     );
   }
 
   Widget _buildCategoryIcon({required IconData icon, required String label, required String category}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center, // 텍스트와 아이콘을 수직 정렬
       children: [
         IconButton(
           icon: Icon(
@@ -315,11 +324,19 @@ class _BookMarkState extends State<BookMark> {
             });
           },
         ),
-        Text(
-          label,
-          style: TextStyle(
-            color: _selectedCategory == category ? Colors.blue : Colors.black,
-            fontSize: 12,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4.0),
+          child: Container(
+            height: 20, // 글자 짤리는거 방지
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: _selectedCategory == category ? Colors.blue : Colors.black,
+                fontSize: 12,
+                height: 0.5, // ㄱ1.5 -> 1.2 수정 10트
+              ),
+            ),
           ),
         ),
       ],
