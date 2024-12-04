@@ -380,7 +380,9 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
         bool isBookmarked = snapshot.data!;
 
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
+            backgroundColor: Colors.white,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {

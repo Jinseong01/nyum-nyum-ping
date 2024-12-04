@@ -18,6 +18,7 @@ class _HomescreenState extends State<Homescreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: IndexedStack(
         index: _menuIndex,
         // 여기 배열에 페이지 생성
