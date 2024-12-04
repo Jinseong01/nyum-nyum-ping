@@ -28,10 +28,16 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
   int bannerIndex = 0;
   late Future<bool> isBookmarkedFuture; // 북마크 상태를 저장하는 Future
 
+  List<String> images = []; // 이미지를 저장할 리스트
+  bool isLoading = true; // 로딩 상태 관리
+  // late Future<int> bookmarkCount;
+
   @override
   void initState() {
     super.initState();
     isBookmarkedFuture = checkBookmarkStatus(); // 북마크 상태 확인
+    // bookmarkCount=fetchRestaurantBookmarkCount();
+    fetchImages(); // Firestore에서 데이터 가져오기
   }
 
   void _showDialog(String content) {
@@ -47,6 +53,61 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
         );
       },
     );
+  }
+
+  void fetchImages() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('Reviews')
+          .doc(widget.restaurant.name)
+          .get();
+
+      if (doc.exists) {
+        print("fetchImages 도중 doc 존재");
+        final data = doc.data();
+        if (data != null && data['reviews'] != null) {
+          final List<dynamic> reviews = data['reviews'];
+
+          // Firebase Storage에서 URL 변환
+          final List<String> imageUrls = [];
+          for (var review in reviews) {
+            if (review['imageUrl'] != null) {
+              final List<dynamic> gsPaths = review['imageUrl'];
+              for (var path in gsPaths) {
+                String downloadUrl = await FirebaseStorage.instance
+                    .refFromURL(path)
+                    .getDownloadURL();
+                imageUrls.add(downloadUrl);
+              }
+            }
+          }
+
+          setState(() {
+            print("데이터가 존재하기 때문에 setState");
+            images = imageUrls;
+            isLoading = false;
+            print("데이터가 존재하기 때문에 setState ${images}");
+          });
+
+          return; // 성공적으로 데이터를 가져오면 함수 종료
+        }else{
+          setState(() {
+            print("데이터가 존재하지 않음 setState");
+            isLoading = false; // 데이터가 없는 경우에도 로딩 상태 종료
+          });
+        }
+      }else{
+        setState(() {
+          print("doc이 존재하지 않음 setState");
+          isLoading = false; // 데이터가 없는 경우에도 로딩 상태 종료
+        });
+      }
+    } catch (e) {
+      print("Error fetching images: $e");
+    }
+    setState(() {
+      isLoading = false; // 실패 시에도 로딩 상태 종료
+    });
   }
 
   Future<bool> requestPermissions() async {
@@ -121,6 +182,30 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
       print("북마크 상태 확인 중 오류 발생: $e");
     }
     return false;
+  }
+
+  Future<int> fetchRestaurantBookmarkCount() async {
+    try {
+      // Firestore에서 해당 식당 문서 가져오기
+      final docRef = FirebaseFirestore.instance
+          .collection('Restaurants')
+          .doc(widget.restaurant.name);
+
+      final snapshot = await docRef.get();
+
+      if (snapshot.exists) {
+        // bookMarks 필드 값 가져오기
+        final bookmarkCount = snapshot.data()?['bookMarks'] as int? ?? 0;
+        print("북마크 수: $bookmarkCount");
+        return bookmarkCount;
+      } else {
+        print("식당 문서가 존재하지 않습니다.");
+      }
+    } catch (e) {
+      print("북마크 수 가져오는 중 오류 발생: $e");
+    }
+
+    return 0; // 오류 발생 시 기본값 반환
   }
 
   Future<void> toggleBookmark(bool isBookmarked) async {
@@ -262,6 +347,10 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
 
       print("Firestore 데이터베이스에 URL 저장 성공: $downloadUrl");
       _showDialog("포토리뷰가 등록되었습니다.");
+      // 이미지 업데이트 콜백 실행
+
+      fetchImages();
+
     } catch (e) {
       print("이미지 업로드 중 오류 발생: $e");
       _showDialog("에러 발생으로 다시 시도해주세요.");
@@ -480,7 +569,31 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
                       ],
                     ),
                   ),
-                  PhotoReviewSlider(restaurantName: widget.restaurant.name),
+                Container(
+                color: Color(0xFFEEF5FF),
+            height: 180,
+            child: isLoading
+                ? Center(child: CircularProgressIndicator(),)
+                : ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: images.length,
+                itemBuilder: (context, index){
+                  return Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Container(
+                        width: 150,
+                        height: 130,
+                        color: Color(0xFFEEF5FF),
+                        child: Image.network(
+                          images[index],
+                          fit: BoxFit.cover,
+                        )
+                    ),
+                  );
+                }
+            )
+            ,
+          ),
                   SizedBox(height: 200,)
                 ],
               ),
@@ -517,7 +630,7 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
           floatingActionButtonLocation: CustomFABLocation(),
         );
       },
-    );
+      );
   }
 }
 

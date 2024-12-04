@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 
 class PhotoReviewSlider extends StatefulWidget {
   final String restaurantName;
-  const PhotoReviewSlider({super.key, required this.restaurantName});
+  final VoidCallback? onImagesUpdated; // 이미지 업데이트 시 호출할 콜백
+  const PhotoReviewSlider({
+    super.key,
+    required this.restaurantName,
+    this.onImagesUpdated, // 콜백 초기화
+  });
 
   @override
   State<PhotoReviewSlider> createState() => _PhotoReviewSliderState();
@@ -54,6 +59,12 @@ class _PhotoReviewSliderState extends State<PhotoReviewSlider> {
             isLoading = false;
             print("데이터가 존재하기 때문에 setState ${images}");
           });
+
+          // 콜백 호출
+          if (widget.onImagesUpdated != null) {
+            widget.onImagesUpdated!();
+          }
+
           return; // 성공적으로 데이터를 가져오면 함수 종료
         }else{
           setState(() {

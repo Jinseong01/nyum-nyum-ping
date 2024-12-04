@@ -19,6 +19,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Firebase Authentication 인스턴스
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool emailCheck=false;
+  bool nicknameCheck=false;
 
   bool _isPasswordVisible = false;
   final _formKey = GlobalKey<FormState>();
@@ -42,9 +44,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       },
     );
   }
-
+  // 이메일 형식 검사
+  bool _isEmailValid(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    return emailRegex.hasMatch(email);
+  }
   // 이메일 중복 체크
   Future<void> _checkEmailDuplicate() async {
+    final email = _emailController.text.trim();
+
+    // 이메일 형식 검사
+    if (!_isEmailValid(email)) {
+      _showDialog("이메일 형식이 맞지 않습니다.");
+      return; // 이메일 형식이 맞지 않으면 중복 체크를 진행하지 않음
+    }
+
     try {
       final querySnapshot = await _firestore
           .collection('User')
@@ -55,75 +69,97 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _showDialog("중복된 이메일입니다.");
       } else {
         _showDialog("사용 가능한 이메일입니다.");
+        emailCheck=true;
       }
     } catch (e) {
       print("이메일 중복 체크 오류: $e");
     }
   }
 
+  // 닉네임 유효성 검사
+  bool _isNicknameValid(String nickname) {
+    final trimmedNickname = nickname.trim();
+    return trimmedNickname.length >= 2 && trimmedNickname.length < 10; // 2자 이상 10자 미만
+  }
+
   // 닉네임 중복 체크
   Future<void> _checkNicknameDuplicate() async {
+    final nickname = _nicknameController.text.trim();
+
+    // 닉네임 유효성 검사
+    if (!_isNicknameValid(nickname)) {
+      _showDialog("닉네임은 2글자 이상 10글자 미만이어야 합니다.");
+      return; // 유효하지 않으면 중복 체크 진행하지 않음
+    }
+
     try {
       final querySnapshot = await _firestore
           .collection('User')
-          .where('nickname', isEqualTo: _nicknameController.text.trim())
+          .where('nickname', isEqualTo: nickname)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         _showDialog("중복된 닉네임입니다.");
       } else {
         _showDialog("사용 가능한 닉네임입니다.");
+        nicknameCheck = true;
       }
     } catch (e) {
       print("닉네임 중복 체크 오류: $e");
     }
   }
-
   // 사용자 생성 함수
   Future<void> _registerUser() async {
-    try {
-      // Firebase Auth 사용자 생성
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+    if(emailCheck && nicknameCheck) {
+      try {
+        // Firebase Auth 사용자 생성
+        UserCredential userCredential = await _auth
+            .createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
 
-      // Firestore에 사용자 정보 저장
-      await _firestore.collection('User').doc(userCredential.user?.email).set({
-        'email': _emailController.text.trim(),
-        'name': _nameController.text.trim(),
-        'nickname': _nicknameController.text.trim()
-      });
+        // Firestore에 사용자 정보 저장
+        await _firestore.collection('User').doc(userCredential.user?.email).set(
+            {
+              'email': _emailController.text.trim(),
+              'name': _nameController.text.trim(),
+              'nickname': _nicknameController.text.trim()
+            });
 
-      // 성공 메시지 출력
-      print("회원가입 및 Firestore 저장 성공: ${userCredential.user?.email}");
+        // 성공 메시지 출력
+        print("회원가입 및 Firestore 저장 성공: ${userCredential.user?.email}");
 
 
-      // 회원가입 성공 시 로그인 화면으로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const FirstScreen()),
-      );
-    } on FirebaseAuthException catch (e) {
-      // 에러 처리
-      String errorMessage;
-      if (e.code == 'email-already-in-use') {
-        errorMessage = '이미 사용 중인 이메일입니다.';
-      } else if (e.code == 'weak-password') {
-        errorMessage = '비밀번호가 너무 약합니다.';
-      } else {
-        errorMessage = '회원가입 중 오류가 발생했습니다.';
+        // 회원가입 성공 시 로그인 화면으로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const FirstScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        // 에러 처리
+        String errorMessage;
+        if (e.code == 'email-already-in-use') {
+          errorMessage = '이미 사용 중인 이메일입니다.';
+        } else if (e.code == 'weak-password') {
+          errorMessage = '비밀번호가 너무 약합니다.';
+        } else {
+          errorMessage = '회원가입 중 오류가 발생했습니다.';
+        }
+
+        // 에러 다이얼로그 표시
+        showDialog(
+          context: context,
+          builder: (context) =>
+              CommonDialog(
+                title: '회원가입 실패',
+                content: errorMessage,
+                onConfirm: () => Navigator.of(context).pop(),
+              ),
+        );
       }
-
-      // 에러 다이얼로그 표시
-      showDialog(
-        context: context,
-        builder: (context) => CommonDialog(
-          title: '회원가입 실패',
-          content: errorMessage,
-          onConfirm: () => Navigator.of(context).pop(),
-        ),
-      );
+    }else{
+      _showDialog("중복 체크를 해주세요");
     }
   }
 

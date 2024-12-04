@@ -206,7 +206,6 @@ class _MainScreenState extends State<MainScreen> {
                                                 ? '${restaurant.address.substring(0, 10)}..'
                                                 : restaurant.address
                                         ),
-                                        // TODO 북마크 처리 1. 북마크 눌렀을 때 색 채우기 처리, 유저가 이미 북마크한 식당에 대해서 채우기 처리
                                         // Icon(
                                         //   Icons.bookmark_border_outlined,
                                         //   color: Colors.blue,

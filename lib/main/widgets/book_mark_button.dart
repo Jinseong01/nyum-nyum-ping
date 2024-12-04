@@ -7,6 +7,8 @@ class BookMarkButton extends StatefulWidget {
   final String imageUrl;
   final String category;
   final double? size;
+  final void Function(bool isBookmarked)? onBookmarkChanged; // 콜백 함수 추가
+
 
   const BookMarkButton({
     super.key,
@@ -14,6 +16,7 @@ class BookMarkButton extends StatefulWidget {
     required this.imageUrl,
     required this.category,
     this.size,
+    this.onBookmarkChanged, // 콜백 함수 초기화
   });
 
   @override
@@ -115,6 +118,11 @@ class _BookMarkButtonState extends State<BookMarkButton> {
       setState(() {
         isBookmarked = !isBookmarked;
       });
+
+      // 콜백 호출 (상태 변경 알림)
+      if (widget.onBookmarkChanged != null) {
+        widget.onBookmarkChanged!(isBookmarked);
+      }
     } catch (e) {
       print("북마크 업데이트 중 오류 발생: $e");
     }
