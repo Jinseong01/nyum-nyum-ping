@@ -8,8 +8,7 @@ import 'login/first_screen.dart';
 import 'package:nyum_nyum_ping/HomeScreen.dart';
 import 'firebase_options.dart';
 
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -27,11 +26,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: "nyum nyum ping",
-
-      home: Homescreen(),
+      home: FirstScreen(),
     );
   }
 }
