@@ -70,7 +70,19 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _currentPosition = position;
     });
+
+    // 위치 정보가 결정되면 지도 중앙으로 이동
+    if (_currentPosition != null) {
+      final GoogleMapController controller = await _controller.future;
+      controller.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+          16, // 줌 레벨 조정
+        ),
+      );
+    }
   }
+
 
   Future<void> _fetchBookmarks() async {
     try {
@@ -146,6 +158,7 @@ class _MapScreenState extends State<MapScreen> {
               title: name,
               snippet: '$category\n$address\n영업시간: $openTime',
             ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
             onTap: () {
               _onMarkerTapped(
                 name,
@@ -369,11 +382,19 @@ class _MapScreenState extends State<MapScreen> {
   void _handleSearch(String query) {
     setState(() {
       if (query.isNotEmpty && !_searchHistory.contains(query)) {
-        _searchHistory.add(query);
+        _searchHistory.add(query);  // 검색 기록 추가
       }
-      _currentSearchText = query;
-      _isSearchVisible = false;
-      _fetchRestaurants();
+      _currentSearchText = query;  // 현재 검색 텍스트 설정
+      _isSearchVisible = false;  // 검색창 닫기
+    });
+
+    _fetchRestaurants().then((_) {
+      // 첫 번째 마커의 정보를 자동으로 띄움
+      if (_markers.isNotEmpty) {
+        final firstMarker = _markers.first;
+        // 첫 번째 마커의 onTap 호출
+        firstMarker.onTap!();  // onTap 콜백 자동 실행
+      }
     });
   }
 
