@@ -9,6 +9,8 @@ import 'package:nyum_nyum_ping/map/widget/category_widget.dart';
 import 'package:nyum_nyum_ping/map/widget/map_widget.dart';
 import 'package:nyum_nyum_ping/map/widget/search_widget.dart';
 
+import '../bookmark/book_mark.dart';
+
 class MapScreen extends StatefulWidget {
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -65,19 +67,7 @@ class _MapScreenState extends State<MapScreen> {
     final position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentPosition = position;
-      _addCurrentLocationMarker(position);
     });
-  }
-
-  void _addCurrentLocationMarker(Position position) {
-    _markers.add(
-      Marker(
-        markerId: MarkerId('current_location'),
-        position: LatLng(position.latitude, position.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
-        infoWindow: InfoWindow(title: '현재 위치'),
-      ),
-    );
   }
 
   Future<void> _fetchBookmarks() async {
@@ -126,7 +116,7 @@ class _MapScreenState extends State<MapScreen> {
       for (var bookmark in bookmarks) {
         final String name = bookmark['name'] ?? '';
 
-        // `Restaurants` 컬렉션에서 이름으로 검색
+        // Restaurants 컬렉션에서 이름으로 검색
         final QuerySnapshot restaurantSnapshot = await FirebaseFirestore.instance
             .collection('Restaurants')
             .where('name', isEqualTo: name)
@@ -279,7 +269,7 @@ class _MapScreenState extends State<MapScreen> {
     return Positioned(
       bottom: 20,
       left: 10,
-      right: 60, // 가로 크기를 조정하여 오른쪽 여백 추가
+      right: 10,
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -292,11 +282,20 @@ class _MapScreenState extends State<MapScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_selectedRestaurant!['imageUrl'] != null &&
-                _selectedRestaurant!['imageUrl'].isNotEmpty)
-              Container(
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RestaurantDetail(
+                      restaurant: _selectedRestaurant!,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
                 width: double.infinity,
-                height: 120, // 이미지 크기를 적절히 줄임
+                height: 120,
                 margin: EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -306,6 +305,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 ),
               ),
+            ),
             Text(
               _selectedRestaurant!['name'],
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
