@@ -382,14 +382,11 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
-                onPressed: () {
-                  // Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainScreen()), // MainScreen으로 이동
-                  );
-                },
-                icon: Icon(Icons.arrow_back)),
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ),
           body: SafeArea(
             child: SingleChildScrollView(

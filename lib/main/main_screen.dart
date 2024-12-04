@@ -152,10 +152,10 @@ class _MainScreenState extends State<MainScreen> {
                       final restaurant=restaurants[index];
                       return GestureDetector(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (context)=>RestaurantDetail(restaurant: restaurant)
-                          ));
-
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => RestaurantDetail(restaurant: restaurant)));
                         },
                         child: Container(
                           decoration: BoxDecoration(

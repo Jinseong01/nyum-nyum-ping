@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _isPasswordVisible=false;
+  bool _isPasswordVisible=true;
   final _formKey=GlobalKey<FormState>();
   final TextEditingController _emailController= TextEditingController();
   final TextEditingController _passwordController=TextEditingController();
@@ -50,9 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // 로그인 성공 시
         print("로그인 성공: ${userCredential.user?.email}");
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const Homescreen()), // MainScreen으로 이동
+          MaterialPageRoute(builder: (context) => Homescreen()),
+              (Route<dynamic> route) => false,
         );
       } catch (e) {
         // FirebaseAuthException 처리
