@@ -48,14 +48,28 @@ class _NicknameChangePageState extends State<NicknameChangePage> {
         _errorMessage = "닉네임을 입력해주세요.";
       });
       return;
-    } 
+    }
     if (newNickname.length > 10) {
       setState(() {
         _errorMessage = "닉네임 양식이 일치하지 않습니다.";
       });
       return;
     }
+
     try {
+      // Firestore에서 닉네임 중복 검사
+      final snapshot = await _firestore
+          .collection('User')
+          .where('nickname', isEqualTo: newNickname)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          _errorMessage = "중복된 닉네임입니다.";
+        });
+        return;
+      }
+
       User? user = _auth.currentUser;
       if (user != null) {
         await _firestore.collection('User').doc(user.email).update({
@@ -80,6 +94,7 @@ class _NicknameChangePageState extends State<NicknameChangePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,

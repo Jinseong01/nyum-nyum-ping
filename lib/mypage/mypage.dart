@@ -143,6 +143,7 @@ Future<void> _deleteImagesFromStorage(List<dynamic> imageUrls) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           const SizedBox(height: 70), // AppBar 위에 여백 추가
@@ -239,7 +240,7 @@ Future<void> _deleteImagesFromStorage(List<dynamic> imageUrls) async {
                     ),
                     onTap: logout, // 로그아웃 로직 연결
                   ),
-                  const SizedBox(height: 300), // 회원탈퇴 섹션 위에 여백 추가
+                  const SizedBox(height: 200), // 회원탈퇴 섹션 위에 여백 추가
                   ListTile(
                     title: Text(
                       "회원탈퇴",
