@@ -19,7 +19,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<
+      GoogleMapController>();
   Position? _currentPosition;
   Set<Marker> _markers = {};
   String _selectedCategory = '';
@@ -124,14 +125,16 @@ class _MapScreenState extends State<MapScreen> {
       }
 
       // 북마크 데이터를 읽어옴
-      final List<dynamic> bookmarks = (userDoc.data() as Map<String, dynamic>)['bookMarks'] ?? [];
+      final List<dynamic> bookmarks = (userDoc.data() as Map<String,
+          dynamic>)['bookMarks'] ?? [];
 
       List<Marker> bookmarkMarkers = [];
       for (var bookmark in bookmarks) {
         final String name = bookmark['name'] ?? '';
 
         // Restaurants 컬렉션에서 이름으로 검색
-        final QuerySnapshot restaurantSnapshot = await FirebaseFirestore.instance
+        final QuerySnapshot restaurantSnapshot = await FirebaseFirestore
+            .instance
             .collection('Restaurants')
             .where('name', isEqualTo: name)
             .get();
@@ -142,12 +145,15 @@ class _MapScreenState extends State<MapScreen> {
         }
 
         // 첫 번째 검색 결과 사용
-        final restaurantData = restaurantSnapshot.docs.first.data() as Map<String, dynamic>;
+        final restaurantData = restaurantSnapshot.docs.first.data() as Map<
+            String,
+            dynamic>;
         final GeoPoint location = restaurantData['location'];
         final String category = restaurantData['category'] ?? '카테고리 없음';
         final String address = restaurantData['address'] ?? '주소 없음';
         final String openTime = restaurantData['openTime'] ?? '영업시간 없음';
-        final String imageUrl = restaurantData['imageUrl'] ?? '이미지 없음'; // imageUrl 추가
+        final String imageUrl = restaurantData['imageUrl'] ??
+            '이미지 없음'; // imageUrl 추가
 
         // 마커 추가
         bookmarkMarkers.add(
@@ -158,7 +164,8 @@ class _MapScreenState extends State<MapScreen> {
               title: name,
               snippet: '$category\n$address\n영업시간: $openTime',
             ),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueBlue),
             onTap: () {
               _onMarkerTapped(
                 name,
@@ -186,7 +193,8 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _fetchRestaurants() async {
     try {
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Restaurants').get();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('Restaurants').get();
 
       List<Marker> tempMarkers = [];
       LatLng? closestPosition;
@@ -206,12 +214,14 @@ class _MapScreenState extends State<MapScreen> {
         }
 
         if (_currentSearchText.isNotEmpty) {
-          if (!name.contains(_currentSearchText) && !category.contains(_currentSearchText)) {
+          if (!name.contains(_currentSearchText) &&
+              !category.contains(_currentSearchText)) {
             continue;
           }
         }
 
-        final restaurantPosition = LatLng(geoPoint.latitude, geoPoint.longitude);
+        final restaurantPosition = LatLng(
+            geoPoint.latitude, geoPoint.longitude);
 
         if (_currentPosition != null) {
           final distance = Geolocator.distanceBetween(
@@ -229,11 +239,14 @@ class _MapScreenState extends State<MapScreen> {
 
         BitmapDescriptor markerIcon;
         if (category == '한식') {
-          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+          markerIcon =
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
         } else if (category == '중식') {
-          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
+          markerIcon =
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
         } else if (category == '양식') {
-          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
+          markerIcon =
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
         } else {
           markerIcon = BitmapDescriptor.defaultMarker;
         }
@@ -266,7 +279,8 @@ class _MapScreenState extends State<MapScreen> {
 
       if (closestPosition != null) {
         final GoogleMapController controller = await _controller.future;
-        controller.animateCamera(CameraUpdate.newLatLngZoom(closestPosition, 16));
+        controller.animateCamera(
+            CameraUpdate.newLatLngZoom(closestPosition, 16));
       }
     } catch (e) {
       print('Firestore 에러: $e');
@@ -276,7 +290,8 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _onMarkerTapped(String name, String address, String openTime, String imageUrl, String category) async {
+  void _onMarkerTapped(String name, String address, String openTime,
+      String imageUrl, String category) async {
     try {
       // Restaurants 컬렉션에서 이름으로 검색
       final QuerySnapshot restaurantSnapshot = await FirebaseFirestore.instance
@@ -293,7 +308,9 @@ class _MapScreenState extends State<MapScreen> {
       }
 
       // 첫 번째 검색 결과 사용
-      final restaurantData = restaurantSnapshot.docs.first.data() as Map<String, dynamic>;
+      final restaurantData = restaurantSnapshot.docs.first.data() as Map<
+          String,
+          dynamic>;
 
       // Restaurant 객체 생성
       Restaurant restaurant = Restaurant.fromJson(restaurantData);
@@ -322,7 +339,8 @@ class _MapScreenState extends State<MapScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
-            BoxShadow(color: Colors.black26, blurRadius: 4.0, offset: Offset(0, 2)),
+            BoxShadow(
+                color: Colors.black26, blurRadius: 4.0, offset: Offset(0, 2)),
           ],
         ),
         child: Column(
@@ -334,9 +352,10 @@ class _MapScreenState extends State<MapScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => restaurant_detail.RestaurantDetail(
-                        restaurant: _selectedRestaurant!,
-                      ),
+                      builder: (context) =>
+                          restaurant_detail.RestaurantDetail(
+                            restaurant: _selectedRestaurant!,
+                          ),
                     ),
                   );
                 }
@@ -382,10 +401,10 @@ class _MapScreenState extends State<MapScreen> {
   void _handleSearch(String query) {
     setState(() {
       if (query.isNotEmpty && !_searchHistory.contains(query)) {
-        _searchHistory.add(query);  // 검색 기록 추가
+        _searchHistory.add(query); // 검색 기록 추가
       }
-      _currentSearchText = query;  // 현재 검색 텍스트 설정
-      _isSearchVisible = false;  // 검색창 닫기
+      _currentSearchText = query; // 현재 검색 텍스트 설정
+      _isSearchVisible = false; // 검색창 닫기
     });
 
     _fetchRestaurants().then((_) {
@@ -393,7 +412,7 @@ class _MapScreenState extends State<MapScreen> {
       if (_markers.isNotEmpty) {
         final firstMarker = _markers.first;
         // 첫 번째 마커의 onTap 호출
-        firstMarker.onTap!();  // onTap 콜백 자동 실행
+        firstMarker.onTap!(); // onTap 콜백 자동 실행
       }
     });
   }
@@ -454,12 +473,15 @@ class _MapScreenState extends State<MapScreen> {
                       });
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 12.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
-                          BoxShadow(color: Colors.black26, blurRadius: 4.0, offset: Offset(0, 2)),
+                          BoxShadow(color: Colors.black26,
+                              blurRadius: 4.0,
+                              offset: Offset(0, 2)),
                         ],
                       ),
                       child: Row(
@@ -467,8 +489,12 @@ class _MapScreenState extends State<MapScreen> {
                           Icon(Icons.search, color: Colors.black),
                           SizedBox(width: 8),
                           Text(
-                            _currentSearchText.isEmpty ? '검색' : _currentSearchText,
-                            style: TextStyle(color: _currentSearchText.isEmpty ? Colors.grey : Colors.black),
+                            _currentSearchText.isEmpty
+                                ? '검색'
+                                : _currentSearchText,
+                            style: TextStyle(color: _currentSearchText.isEmpty
+                                ? Colors.grey
+                                : Colors.black),
                           ),
                         ],
                       ),
@@ -482,7 +508,7 @@ class _MapScreenState extends State<MapScreen> {
                 ],
               ),
             ),
-          _buildRestaurantInfo(),
+          if (!_isSearchVisible) _buildRestaurantInfo(), // 조건부로 가게 정보 렌더링
         ],
       ),
     );
