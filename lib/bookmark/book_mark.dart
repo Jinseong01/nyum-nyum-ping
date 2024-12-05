@@ -61,6 +61,7 @@ class _BookMarkState extends State<BookMark> {
 
         setState(() {
           _bookmarks = updatedBookmarks.whereType<Map<String, dynamic>>().toList();
+           _bookmarks.sort((a,b) => a['name'].compareTo(b['name'])); // 내림차순 정렬 추가
           _isLoading = false;
         });
       } else {
@@ -189,55 +190,66 @@ class _BookMarkState extends State<BookMark> {
                                 : 'https://via.placeholder.com/150',
                             name: bookmark['name'],
                             onMemoTap: () {
-                              final TextEditingController memoController =
-                                  TextEditingController(text: bookmark['memo']);
-                    
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text(
-                                    bookmark['name'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  content: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: TextField(
-                                      controller: memoController,
-                                      maxLines: 7,
-                                      style: const TextStyle(fontSize: 14, color: Colors.black),
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: '메모를 수정하세요',
-                                        hintStyle: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12,
-                                        ),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      ),
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        updateMemo(index, memoController.text);
-                                      },
-                                      child: const Text('저장'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('취소'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+  final TextEditingController memoController =
+      TextEditingController(text: bookmark['memo']);
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      // backgroundColor: Colors.grey[300],
+      title: Text(
+        bookmark['name'],
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      content: Container( 
+        width: MediaQuery.of(context).size.width * 0.8, // 다이얼로그 고정 넓이 설정
+        decoration: BoxDecoration(
+          color: Colors.grey[100], // 색깔 수정
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: TextField(
+          controller: memoController,
+          maxLines: null, // [수정사항 1] 자동 줄바꿈 활성화
+          maxLength: 100, // [수정사항 2] 최대 100자 제한
+          style: const TextStyle(fontSize: 14, color: Colors.black),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: '메모를 수정하세요 (최대 100자)',
+            hintStyle: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          onChanged: (text) {
+            if (text.length > 100) {
+              memoController.text = text.substring(0, 100);
+              memoController.selection = TextSelection.fromPosition(
+                TextPosition(offset: memoController.text.length),
+              );
+            }
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            updateMemo(index, memoController.text);
+          },
+          child: const Text('저장'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('취소'),
+        ),
+      ],
+    ),
+  );
+},
                             onBookmarkToggle: () {
                               showDialog(
                                 context: context,
